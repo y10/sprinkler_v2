@@ -12,7 +12,7 @@ If you like my **Sprinkler Controller**, give it a star, or fork it and contribu
 
 ## Development
 
-1. Download the project from the github [**repository**](https://github.com/y10/esp-sprinkler_v2).
+1. Download the project from the github [**repository**](https://github.com/y10/sprinkler_v2).
 2. Open **Arduino IDE**, and in the preferences window set the sketch location to arduino folder located inside the project, see example:
  C:\Users\\%username%\Documents\Arduino\\_esp-sprinkler_v2_\\**arduino**
 3. Open **Visual Studio Code** and select the project root folder, as following:
