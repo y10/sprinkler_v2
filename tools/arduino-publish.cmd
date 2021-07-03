@@ -1,0 +1,1 @@
+xcopy /s ..\.bin\arduino.ino.bin \\nuc\sites\ota\sprinkler_v2.bin* /Y

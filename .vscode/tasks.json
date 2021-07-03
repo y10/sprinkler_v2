@@ -1,0 +1,15 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "Webpack",
+			"command": "gulp",
+			"args": ["default"],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+		    }
+		}
+	]
+}

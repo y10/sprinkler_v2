@@ -1,0 +1,80 @@
+<html>
+
+<head>
+    <title>Sprinkler</title>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-title" content="Sprinkler">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="description" content="Sprinkler Controller and Timer">
+    <link rel="icon" type="image/png" href="./favicon.png">
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+    <link rel="apple-touch-startup-image" href="./apple-touch-icon.png">
+    <link rel="manifest" href="./manifest.json">
+    <style>
+        :root {
+            --primary-text-color: #fff;
+            --primary-background-color: black;
+            --primary-border-color: gray;
+            --primary-disabled-color: gray;
+
+            --secondary-text-color: black;
+            --secondary-background-color: rgb(239, 239, 239);
+
+            --info-text-color: #fff;
+            --info-background-color: rgb(65, 184, 131);
+            --info-alt-background-color:#70C041;
+            
+            --warn-text-color: black;
+            --warn-background-color: #ff8800;
+            
+            --alert-text-color: #fff;
+            --alert-background-color: red;
+        }
+
+        html,
+        body {
+            padding: 0px;
+            margin: 0px;
+            border: 0px;
+            width: 100%;
+        }
+
+        body {
+            font-family: sans-serif;
+            height: 100vh;
+            font-size: 1em;
+            display: grid;
+            place-items: center;
+            background: var(--primary-background-color);
+            color: var(--primary-disabled-color);
+  -webkit-touch-callout: none; 
+    -webkit-user-select: none; 
+     -khtml-user-select: none; 
+       -moz-user-select: none; 
+        -ms-user-select: none; 
+            user-select: none; 
+        }
+
+        #loading {
+            padding: 60 0;
+            transition: all 0.5s ease;
+            animation: glow 2s infinite alternate;
+        }
+
+        @keyframes glow {
+            to {
+                color: var(--primary-text-color, #fff);
+            }
+        }
+    </style>
+<body>
+    <sprinkler-app>
+        <div id="loading">Loading...</div>
+    </sprinkler-app>
+    <script src="./js/index.js"></script>
+</body>
+
+</html>

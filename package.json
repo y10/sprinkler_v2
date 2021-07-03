@@ -1,0 +1,28 @@
+{
+  "name": "esp8266-filesystem-builder",
+  "description": "Webpack and gulp based build system for ESP8266 file system files",
+  "main": "gulpfile.js",
+  "author": "Serhiy Voytenko <serhiy.voytenko@gmail.com>",
+  "license": "GPL-3.0",
+  "devDependencies": {
+    "del": "5.1.0",
+    "@babel/core": "~7.13.14",
+    "@babel/preset-env": "~7.13.12",
+    "@babel/plugin-transform-runtime": "~7.13.10",
+    "@babel/plugin-proposal-decorators": "~7.13.5",
+    "@babel/plugin-proposal-class-properties": "~7.13.0",
+    "babel-loader": "~8.0.6",
+    "webpack": "~5.29.0",
+    "webpack-stream": "~6.1.2",
+    "gulp": "^4.0.0",
+    "gulp-css-base64": "^1.3.4",
+    "gulp-csslint": "^1.0.0",
+    "gulp-gzip": "^1.4.0",
+    "gulp-htmllint": "0.0.16",
+    "gulp-htmlmin": "^5.0.1",
+    "gulp-inline": "^0.1.1",
+    "gulp-remove-code": "^3.0.4",
+    "gulp-rename": "^1.4.0",
+    "gulp-replace": "^1.0.0"
+  }
+}

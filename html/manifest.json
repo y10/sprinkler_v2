@@ -1,0 +1,13 @@
+{
+    "short_name": "Sprinkler",
+    "name": "Sprinkler Controller and Timer",
+    "icons": [
+        {
+            "src": "/favicon.png",
+            "sizes": "180x180",
+            "type": "image/png"
+        }
+    ],
+    "start_url": "/",
+    "display": "standalone"
+}
