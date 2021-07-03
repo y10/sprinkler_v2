@@ -5,10 +5,10 @@ _Written in [Visual Studio Code](https://marketplace.visualstudio.com/items?item
 
 If you like my **Sprinkler Controller**, give it a star, or fork it and contribute!
 
-![Screenshot 1](/docs/screenshot_1.png)
-![Screenshot 2](/docs/screenshot_2.png)
-![Screenshot 3](/docs/screenshot_3.png)
-![Screenshot 4](/docs/screenshot_4.png)
+![Screenshot 1](/docs/Screenshot_1.png)
+![Screenshot 2](/docs/Screenshot_2.png)
+![Screenshot 3](/docs/Screenshot_3.png)
+![Screenshot 4](/docs/Screenshot_4.png)
 
 ## Development
 
