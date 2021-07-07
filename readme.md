@@ -9,6 +9,7 @@ If you like my **Sprinkler Controller**, give it a star, or fork it and contribu
 ![Screenshot 2](/docs/Screenshot_2.png)
 ![Screenshot 3](/docs/Screenshot_3.png)
 ![Screenshot 4](/docs/Screenshot_4.png)
+![Image 1](/docs/Image_1.jpg)
 
 ## Development
 
