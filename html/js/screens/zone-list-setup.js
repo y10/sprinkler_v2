@@ -8,7 +8,6 @@ import { MAX_ZONES } from "../config";
 const template = (self) => `
 <style>
 .container {
-  width: 90%;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
