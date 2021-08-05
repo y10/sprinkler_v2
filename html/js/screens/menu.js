@@ -36,9 +36,9 @@ button {
 </style>
 
 <div class="container">
+  <button id="zones">zones</button>
   <button id="setup">general</button>
   <button id="console">console</button>
-  <button id="zones">setup zones</button>
   <button id="update">firmware update</button>
   <button id="reset">factory reset</button>
   <button id="restart">restart</button>
