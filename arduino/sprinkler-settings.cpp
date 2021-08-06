@@ -56,11 +56,12 @@ void SprinklerSettings::fromConfig(SprinklerConfig &config)
 
     for (uint8_t i = 0; i < SKETCH_MAX_ZONES; i++)
     {
+        unsigned int zoneid = i + 1;
         if (config.zones[i].defined)
         {
-            SprinklerZone *zone = new SprinklerZone(i, onTimerTick);
+            SprinklerZone *zone = new SprinklerZone(zoneid, onTimerTick);
             zone->fromConfig(config.zones[i]);
-            zones[i] = zone;
+            zones[zoneid] = zone;
         }
     }
 }
@@ -73,7 +74,7 @@ SprinklerConfig SprinklerSettings::toConfig()
     {
         unsigned int zoneid = kv.first;
         SprinklerZone *zone = kv.second;
-        config.zones[zoneid] = zone->toConfig();
+        config.zones[zoneid-1] = zone->toConfig();
     }
     return config;
 }
