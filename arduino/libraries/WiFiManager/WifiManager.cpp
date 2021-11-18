@@ -30,10 +30,10 @@ void WiFiManager::begin(char const *apName)
 void WiFiManager::begin(char const *apName, char const *apPasswd)
 {
   dnsServer.reset(new DNSServer());
-  server.reset(new AsyncWebServer(80));
+  server.reset(new ESP8266WebServer(80));
 
   DEBUG_PRINT(F(""));
-  _chip = apName;
+  _apName = apName;
   _apPasswd = apPasswd;
   start = millis();
 
@@ -57,11 +57,11 @@ void WiFiManager::begin(char const *apName, char const *apPasswd)
 
   if (_apPasswd != NULL)
   {
-    WiFi.softAP(_chip, _apPasswd); //password option
+    WiFi.softAP(_apName, _apPasswd); //password option
   }
   else
   {
-    WiFi.softAP(_chip);
+    WiFi.softAP(_apName);
   }
 
   delay(500); // Without delay I've seen the IP address blank
@@ -72,13 +72,13 @@ void WiFiManager::begin(char const *apName, char const *apPasswd)
   dnsServer->setErrorReplyCode(DNSReplyCode::NoError);
   dnsServer->start(DNS_PORT, "*", WiFi.softAPIP());
 
-  server->on("/", HTTP_GET, std::bind(&WiFiManager::handleRoot, this, std::placeholders::_1)); 
-  server->on("/", HTTP_POST, std::bind(&WiFiManager::handleRootPost, this, std::placeholders::_1)); 
-  server->on("/info", HTTP_GET, std::bind(&WiFiManager::handleHostInfo, this, std::placeholders::_1)); 
-  server->on("/scan", HTTP_GET, std::bind(&WiFiManager::handleWifiScan, this, std::placeholders::_1)); 
-  server->on("/generate_204", std::bind(&WiFiManager::handle204, this, std::placeholders::_1)); //Android/Chrome OS captive portal check.
-  server->on("/fwlink", std::bind(&WiFiManager::handleRoot, this, std::placeholders::_1));      //Microsoft captive portal. Maybe not needed. Might be handled by notFound handler.
-  server->onNotFound(std::bind(&WiFiManager::handleNotFound, this, std::placeholders::_1));
+  server->on("/", HTTP_GET, std::bind(&WiFiManager::handleRoot, this));
+  server->on("/", HTTP_POST, std::bind(&WiFiManager::handleRootPost, this));
+  server->on("/info", HTTP_GET, std::bind(&WiFiManager::handleHostInfo, this));
+  server->on("/scan", HTTP_GET, std::bind(&WiFiManager::handleWifiScan, this));
+  server->on("/generate_204", std::bind(&WiFiManager::handle204, this)); //Android/Chrome OS captive portal check.
+  server->on("/fwlink", std::bind(&WiFiManager::handleRoot, this));      //Microsoft captive portal. Maybe not needed. Might be handled by notFound handler.
+  server->onNotFound(std::bind(&WiFiManager::handleNotFound, this));
   server->begin(); // Web server start
   DEBUG_PRINT(F("HTTP server started"));
 }
@@ -124,13 +124,15 @@ wm_status_t WiFiManager::autoConnect(char const *apName, char const *apPasswd)
   {
     //DNS
     dnsServer->processNextRequest();
+    //HTTP
+    server->handleClient();
 
     if (connect)
     {
       delay(2000);
-      DEBUG_PRINT("Connecting to new AP as " + _chip);
+      DEBUG_PRINT("Connecting to new AP as " + _apName);
       connect = false;
-      WiFi.hostname(_chip.c_str());
+      WiFi.hostname(_apName.c_str());
       connectWifi(_ssid, _pass);
       int s = WiFi.status();
       if (s == WL_CONNECTED)
@@ -185,39 +187,6 @@ String WiFiManager::getPassword()
   return _pass;
 }
 
-String WiFiManager::getDeviceName()
-{
-  if (_chip == "")
-  {
-    DEBUG_PRINT(F("Reading AP name"));
-    _chip = "ESP" + String(ESP.getChipId());
-    DEBUG_PRINT("AP name: " + _chip);
-  }
-  return _chip;
-}
-
-String WiFiManager::getFriendlyName()
-{
-  if (_name == "")
-  {
-    DEBUG_PRINT(F("Reading Friendly Name"));
-    _name = getDeviceName();
-    DEBUG_PRINT("Friendly Name: " + _name);
-  }
-  return _name;
-}
-
-String WiFiManager::setFriendlyName(const char * friendlyName)
-{
-  String name = friendlyName;
-  if (name == "")
-  {
-    name = getDeviceName();
-  }
-  _name = name;
-  return _name;
-}
-
 String WiFiManager::urldecode(const char *src)
 {
   String decoded = "";
@@ -265,7 +234,7 @@ void WiFiManager::resetSettings()
   DEBUG_PRINT(F("settings invalidated"));
   DEBUG_PRINT(F("THIS MAY CAUSE AP NOT TO STRT UP PROPERLY. YOU NEED TO COMMENT IT OUT AFTER ERASING THE DATA."));
   WiFi.disconnect(true);
-  //delay(200);
+  delay(200);
 }
 
 void WiFiManager::setTimeout(unsigned long seconds)
@@ -285,36 +254,41 @@ void WiFiManager::setAPConfig(IPAddress ip, IPAddress gw, IPAddress sn)
   _sn = sn;
 }
 
-void WiFiManager::handleRoot(AsyncWebServerRequest *request)
+void WiFiManager::handleRoot()
 {
   DEBUG_PRINT(F("Handle root"));
-  if (captivePortal(request))
+  if (captivePortal())
   { // If caprive portal redirect instead of displaying the page.
     return;
   }
 
-  AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", SKETCH_SETUP_HTML_GZ, sizeof(SKETCH_SETUP_HTML_GZ));
-  response->addHeader("Content-Encoding", "gzip");
-  response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-  response->addHeader("Pragma", "no-cache");
-  response->addHeader("Expires", "-1");
+  server->sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  server->sendHeader("Pragma", "no-cache");
+  server->sendHeader("Expires", "-1");
+  server->setContentLength(sizeof(SKETCH_SETUP_HTML_GZ));
+  server->sendHeader("Content-Encoding", "gzip");
+  server->send_P(200, "text/html", (const char*)SKETCH_SETUP_HTML_GZ, sizeof(SKETCH_SETUP_HTML_GZ));
 
-  request->send(response);
+  server->client().stop(); // Stop is needed because we sent no content length
 }
 
-void WiFiManager::handleHostInfo(AsyncWebServerRequest *request)
+void WiFiManager::handleHostInfo()
 {
-  AsyncWebServerResponse *response = request->beginResponse(200, "application/json", "{ \"name\": \"" + _name + "\", \"chip\": \"" + _chip + "\" }");
-  response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-  response->addHeader("Pragma", "no-cache");
-  response->addHeader("Expires", "-1");
-  request->send(response);
+  server->sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  server->sendHeader("Pragma", "no-cache");
+  server->sendHeader("Expires", "-1");
+  server->send(200, "application/json", "{ \"name\": \"" + _apName + "\" }"); 
+  server->client().stop();
 
   DEBUG_PRINT(F("Sent info"));
 }
 
-void WiFiManager::handleWifiScan(AsyncWebServerRequest *request)
+void WiFiManager::handleWifiScan()
 {
+  server->sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  server->sendHeader("Pragma", "no-cache");
+  server->sendHeader("Expires", "-1");
+  
   int n = WiFi.scanNetworks();
   String content = "[";
   DEBUG_PRINT(F("Scan done"));
@@ -338,87 +312,74 @@ void WiFiManager::handleWifiScan(AsyncWebServerRequest *request)
 
   content += "]";
 
-  AsyncWebServerResponse *response = request->beginResponse(200, "application/json", content);
-  response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-  response->addHeader("Pragma", "no-cache");
-  response->addHeader("Expires", "-1");
-  request->send(response);
+  server->send(200, "application/json", content);
+  server->client().stop();
 
   DEBUG_PRINT(F("Sent config page"));
 }
 
-void WiFiManager::handleRootPost(AsyncWebServerRequest *request)
+void WiFiManager::handleRootPost()
 {
   DEBUG_PRINT(F("WiFi save"));
 
-  _name = urldecode(request->arg("name").c_str());
-  _chip = urldecode(request->arg("chip").c_str());
-  _ssid = urldecode(request->arg("ssid").c_str());
-  _pass = urldecode(request->arg("pass").c_str());
+  _apName = urldecode(server->arg("name").c_str());
+  _ssid = urldecode(server->arg("ssid").c_str());
+  _pass = urldecode(server->arg("pass").c_str());
 
-
-  AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", SKETCH_STATUS_HTML_GZ, sizeof(SKETCH_STATUS_HTML_GZ));
-  response->addHeader("Content-Encoding", "gzip");
-  response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-  response->addHeader("Pragma", "no-cache");
-  response->addHeader("Expires", "-1");
- 
+  server->sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  server->sendHeader("Pragma", "no-cache");
+  server->sendHeader("Expires", "-1");
+  server->setContentLength(sizeof(SKETCH_STATUS_HTML_GZ));
+  server->sendHeader("Content-Encoding", "gzip");
+  server->send_P(200, "text/html", (const char*)SKETCH_STATUS_HTML_GZ, sizeof(SKETCH_STATUS_HTML_GZ));
   DEBUG_PRINT(F("Sent wifi save page"));
 
   connect = true; //signal ready to connect/reset
 }
 
-void WiFiManager::handle204(AsyncWebServerRequest *request)
+void WiFiManager::handle204()
 {
-  AsyncWebServerResponse *response = request->beginResponse(204, "text/plain", "");
-  response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-  response->addHeader("Pragma", "no-cache");
-  response->addHeader("Expires", "-1");
-  request->send(response);
+  DEBUG_PRINT(F("204 No Response"));
+  server->sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  server->sendHeader("Pragma", "no-cache");
+  server->sendHeader("Expires", "-1");
+  server->send(204, "text/plain", "");
 }
 
-void WiFiManager::handleNotFound(AsyncWebServerRequest *request)
+void WiFiManager::handleNotFound()
 {
-  if (captivePortal(request))
+  if (captivePortal())
   { // If captive portal redirect instead of displaying the error page.
     return;
   }
-  
-  DEBUG_PRINT("NOT_FOUND: ");
-  if(request->method() == HTTP_GET)
-    DEBUG_PRINT("GET");
-  else if(request->method() == HTTP_POST)
-    DEBUG_PRINT("POST");
-  else if(request->method() == HTTP_DELETE)
-    DEBUG_PRINT("DELETE");
-  else if(request->method() == HTTP_PUT)
-    DEBUG_PRINT("PUT");
-  else if(request->method() == HTTP_PATCH)
-    DEBUG_PRINT("PATCH");
-  else if(request->method() == HTTP_HEAD)
-    DEBUG_PRINT("HEAD");
-  else if(request->method() == HTTP_OPTIONS)
-    DEBUG_PRINT("OPTIONS");
-  else
-    DEBUG_PRINT("UNKNOWN");
+  String message = "File Not Found\n\n";
+  message += "URI: ";
+  message += server->uri();
+  message += "\nMethod: ";
+  message += (server->method() == HTTP_GET) ? "GET" : "POST";
+  message += "\nArguments: ";
+  message += server->args();
+  message += "\n";
 
-  DEBUG_PRINT(" http://" + request->host() + request->url() + "\n");
-
-  AsyncWebServerResponse *response = request->beginResponse(404, "text/plain", "");
-  response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-  response->addHeader("Pragma", "no-cache");
-  response->addHeader("Expires", "-1");
-  request->send(response);
+  for (uint8_t i = 0; i < server->args(); i++)
+  {
+    message += " " + server->argName(i) + ": " + server->arg(i) + "\n";
+  }
+  server->sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  server->sendHeader("Pragma", "no-cache");
+  server->sendHeader("Expires", "-1");
+  server->send(404, "text/plain", message);
 }
 
-boolean WiFiManager::captivePortal(AsyncWebServerRequest *request)
+
+boolean WiFiManager::captivePortal()
 {
-  if (!isIp(request->host()))
+  if (!isIp(server->hostHeader()))
   {
     DEBUG_PRINT(F("Request redirected to captive portal"));
-    AsyncWebServerResponse *response = request->beginResponse(302,"text/plain","");
-    response->addHeader("Location", String("http://") + toStringIp(request->client()->localIP()));
-    request->send(response);
+    server->sendHeader("Location", String("http://") + toStringIp(server->client().localIP()), true);
+    server->send(302, "text/plain", ""); // Empty content inhibits Content-length header so we have to close the socket ourselves.
+    server->client().stop();             // Stop is needed because we sent no content length
     return true;
   }
   return false;

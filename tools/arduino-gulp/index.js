@@ -102,6 +102,7 @@ module.exports =
 #define SKETCH_VERSION "${config.version}"\r\n
 #define SKETCH_MAX_ZONES ${config.maxZones}\r\n
 #define SKETCH_MAX_TIMERS ${config.maxTimers}\r\n
+#define SKETCH_TIMER_DEFAULT_LIMIT = ${config.timeLimit} * 60;
 `);
             callback(null, destination);
         });
@@ -121,6 +122,7 @@ module.exports =
             destination.path = [...parts, 'js', 'config.js'].join(path.sep);
             destination.contents = Buffer.from(`export const FIRMWARE_URL = "${config.firmwareUrl}";
 export const MAX_ZONES = ${config.maxZones}
+export const TIME_LIMIT_DEFAULT = ${config.timeLimit} * 60;
 export const Version = {
     major:     ${major},
     minor:     ${minor},

@@ -66,18 +66,18 @@ void setupHttp()
   http.on("/manifest.json", [&](AsyncWebServerRequest *rqt){ gzip(rqt, "application/json", SKETCH_MANIFEST_JSON_GZ, sizeof(SKETCH_MANIFEST_JSON_GZ)); });
   http.on("/js/settings.js", [&](AsyncWebServerRequest *rqt){ gzip(rqt, "application/javascript", SKETCH_SETTINGS_JS_GZ, sizeof(SKETCH_SETTINGS_JS_GZ)); });
 
-  http.on("/api/state", HTTP_GET, [&] (AsyncWebServerRequest *request)
+  http.on("/api/state", ASYNC_HTTP_GET, [&] (AsyncWebServerRequest *request)
   {
     json(request, Sprinkler.Timers.toJSON());
   });
 
-  http.on("/api/zone/{}/state", HTTP_GET, [&] (AsyncWebServerRequest *request)
+  http.on("/api/zone/{}/state", ASYNC_HTTP_GET, [&] (AsyncWebServerRequest *request)
   {
     uint8_t rel = request->pathArg(0).toInt();
     json(request, Sprinkler.Timers.toJSON(rel));
   });
 
-  http.on("/api/zone/{}/start", HTTP_GET, [&] (AsyncWebServerRequest *request)
+  http.on("/api/zone/{}/start", ASYNC_HTTP_GET, [&] (AsyncWebServerRequest *request)
   {
     uint8_t rel = request->pathArg(0).toInt();
     uint8_t dur = request->hasArg("d") ? request->arg("d").toInt() : 5;
@@ -85,26 +85,26 @@ void setupHttp()
     Sprinkler.start(rel, dur);
     json(request, Sprinkler.Timers.toJSON(rel));
   });
-  http.on("/api/zone/{}/stop", HTTP_GET, [&] (AsyncWebServerRequest *request)
+  http.on("/api/zone/{}/stop", ASYNC_HTTP_GET, [&] (AsyncWebServerRequest *request)
   {
     uint8_t rel = request->pathArg(0).toInt();
     Sprinkler.stop(rel);
     json(request, Sprinkler.Timers.toJSON(rel));
   });
-  http.on("/api/zone/{}/pause", HTTP_GET, [&] (AsyncWebServerRequest *request)
+  http.on("/api/zone/{}/pause", ASYNC_HTTP_GET, [&] (AsyncWebServerRequest *request)
   {
     uint8_t rel = request->pathArg(0).toInt();
     Sprinkler.pause(rel);
     json(request, Sprinkler.Timers.toJSON(rel));
   });
-  http.on("/api/zone/{}/resume", HTTP_GET, [&] (AsyncWebServerRequest *request)
+  http.on("/api/zone/{}/resume", ASYNC_HTTP_GET, [&] (AsyncWebServerRequest *request)
   {
     uint8_t rel = request->pathArg(0).toInt();
     Sprinkler.resume(rel);
     json(request, Sprinkler.Timers.toJSON(rel));
   });
 
-  http.on("/api/relay/{}/{}", HTTP_GET, [&] (AsyncWebServerRequest *request) 
+  http.on("/api/relay/{}/{}", ASYNC_HTTP_GET, [&] (AsyncWebServerRequest *request) 
   {
     uint8_t rel = request->pathArg(0).toInt();
     uint8_t val = LOW;
@@ -126,7 +126,7 @@ void setupHttp()
     json(request, (String) "{\"rel\":" + rel + ", \"value\":" + val + "}");
   });
 
-  http.on("/api/pin/{}/{}", HTTP_GET, [&] (AsyncWebServerRequest *request) 
+  http.on("/api/pin/{}/{}", ASYNC_HTTP_GET, [&] (AsyncWebServerRequest *request) 
   {
     uint8_t pin = request->pathArg(0).toInt();
     uint8_t val = LOW;
@@ -153,13 +153,13 @@ void setupHttp()
     json(request, (String) "{\"pin\":" + pin + ", \"value\":" + val + "}");
   });
 
-  http.on("/api/settings/general", HTTP_GET, [&] (AsyncWebServerRequest *request) {
+  http.on("/api/settings/general", ASYNC_HTTP_GET, [&] (AsyncWebServerRequest *request) {
      json(request, (String) "{ \"name\": \"" + Sprinkler.dispname() + "\", \"chip\": \"" + Sprinkler.hostname() + "\" }"); 
   });
-  http.on("/api/settings/zones", HTTP_GET, [&] (AsyncWebServerRequest *request) {
+  http.on("/api/settings/zones", ASYNC_HTTP_GET, [&] (AsyncWebServerRequest *request) {
      json(request, Sprinkler.Settings.toJSON()); 
   });
-  http.on("/api/settings", HTTP_GET, [&] (AsyncWebServerRequest *request) {
+  http.on("/api/settings", ASYNC_HTTP_GET, [&] (AsyncWebServerRequest *request) {
      json(request, Sprinkler.toJSON()); 
   });
  
@@ -174,13 +174,13 @@ void setupHttp()
     }
   }, 4096));
 
-   http.on("/esp/log", HTTP_GET, [&](AsyncWebServerRequest *request) {
+   http.on("/esp/log", ASYNC_HTTP_GET, [&](AsyncWebServerRequest *request) {
      StreamString jStream;
      Console.printTo(jStream);
      json(request, jStream);
   });
 
-  http.on("/esp/logLevel", HTTP_POST, [&](AsyncWebServerRequest *request) {
+  http.on("/esp/logLevel", ASYNC_HTTP_POST, [&](AsyncWebServerRequest *request) {
     const char * logLevel = request->arg("level").c_str();
     http_console.printf("POST: /esp/logLevel?level=%s", logLevel);         
     http_console.println();
@@ -189,22 +189,22 @@ void setupHttp()
     Sprinkler.restart();
   });
 
-  http.on("/esp/time", HTTP_GET, [&](AsyncWebServerRequest *request) {
+  http.on("/esp/time", ASYNC_HTTP_GET, [&](AsyncWebServerRequest *request) {
     time_t t = time(nullptr);
     json(request, (String) "{ \"d\": \"" + (String)day(t) + " " + (String)monthShortStr(month(t)) + " " + (String)year(t) + "\", \"h\": \"" + hour(t) + "\", \"m\": \"" + minute(t) + "\", \"s\": \"" + second(t) + "\" }");
   });
 
-  http.on("/esp/restart", HTTP_POST, [&](AsyncWebServerRequest *request) {
+  http.on("/esp/restart", ASYNC_HTTP_POST, [&](AsyncWebServerRequest *request) {
      Sprinkler.restart(); 
   });
 
-  http.on("/esp/reset", HTTP_POST, [&](AsyncWebServerRequest *request) {
+  http.on("/esp/reset", ASYNC_HTTP_POST, [&](AsyncWebServerRequest *request) {
     Sprinkler.reset(); 
   });
 
-  http.addHandler(new AsyncHTTPUpdateHandler("/esp/update", HTTP_POST));
+  http.addHandler(new AsyncHTTPUpdateHandler("/esp/update", ASYNC_HTTP_POST));
 
-  http.addHandler(new AsyncHTTPUpgradeHandler("/esp/upgrade", HTTP_POST, "https://ota.voights.net/sprinkler_v2.bin"));
+  http.addHandler(new AsyncHTTPUpgradeHandler("/esp/upgrade", ASYNC_HTTP_POST, "https://ota.voights.net/sprinkler_v2.bin"));
 
   ws.onEvent([&](AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len){
     IPAddress ip = client->remoteIP();

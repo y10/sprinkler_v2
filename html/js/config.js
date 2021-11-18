@@ -1,5 +1,7 @@
 export const FIRMWARE_URL = "http://ota.voights.net/sprinkler_v2.bin";
 export const MAX_ZONES = 6;
+export const TIME_LIMIT_DEFAULT = 5 * 60;
+
 export const Version = {
     major:     2,
     minor:     0,

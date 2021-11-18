@@ -8,7 +8,6 @@ const template = (self) => `
     <sketch-outlet>
         <sprinkler-main></sprinkler-main>
     </sketch-outlet>
-    ${App.zones().count() > 1 ? '' : '<sketch-menu-bottom></sketch-menu-bottom>'}
     <sketch-snackbar></sketch-snackbar>
     <sketch-spinner></sketch-spinner>
 </div>`;
@@ -44,10 +43,6 @@ export class Index extends HTMLElement {
         this.$Toggle.item().opened ? this.close() : this.open();
     }
 
-    onMenu(e) {
-        this.$Chevron.item().opened ? this.close() : Router.navigate('menu');
-    }
-
     onSpinning(e) {
         this.$Spinner.item().spinning = e.detail.spinning;
     }
@@ -81,24 +76,13 @@ export class Index extends HTMLElement {
 
     onNavigateTo(e) {
         this.$Toggle.item().open();
-
-        if (e.detail.to == "menu") {
-            this.$Chevron.forEach(x => x.open());
-        } else {
-            this.$Chevron.forEach(x => x.hide());
-        }
     }
 
     onNavigateFrom(e) {
         if (e.detail.to == "main") {
-            this.$Chevron.forEach(x => {
-                x.show();
-                x.close();
-            });
             this.$Toggle.item().close();
         }
         else if (e.detail.to == "menu") {
-            this.$Chevron.forEach(x => x.show());
         }
     }
 
@@ -107,7 +91,7 @@ export class Index extends HTMLElement {
     }
 
     open() {
-        Router.navigate('settings');
+        App.zones().count() > 1 ? Router.navigate('settings') : Router.navigate('menu');
     }
 
     render() {
@@ -116,8 +100,6 @@ export class Index extends HTMLElement {
             this.$Spinner = $('sketch-spinner');
             this.$Toggle = $('sketch-menu-toggle')
                 .on('click', this.onToggle.bind(this));
-            this.$Chevron = $('sketch-menu-bottom')
-                .on('click', this.onMenu.bind(this));
             this.$Outlet = $('sketch-outlet')
                 .on('navigate-to', this.onNavigateTo.bind(this))
                 .on('navigate-from', this.onNavigateFrom.bind(this));

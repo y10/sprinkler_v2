@@ -2,6 +2,8 @@ import { String, Http, Wsc } from "../system";
 import { jQuery } from "../system/jquery";
 import { App } from "../models/app";
 
+import { TIME_LIMIT_DEFAULT } from "../config";
+
 const style = `
 <style>
 
@@ -194,7 +196,6 @@ const template = (self) => `${style}
   </span>
 </div>
 `
-const TIME_LIMIT_DEFAULT = 5 * 60;
 const FULL_DASH_ARRAY = 283;
 const WARNING_THRESHOLD = 60;
 const ALERT_THRESHOLD = 10;

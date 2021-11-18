@@ -74,7 +74,7 @@ class AsyncCallbackWebHandler: public AsyncWebHandler {
     bool _isRegex;
     bool _isBraces;
   public:
-    AsyncCallbackWebHandler() : _uri(), _method(HTTP_ANY), _onRequest(NULL), _onUpload(NULL), _onBody(NULL), _isRegex(false), _isBraces(false) {}
+    AsyncCallbackWebHandler() : _uri(), _method(ASYNC_HTTP_ANY), _onRequest(NULL), _onUpload(NULL), _onBody(NULL), _isRegex(false), _isBraces(false) {}
     void setUri(const String& uri){ 
       _uri = uri; 
       _isRegex = uri.startsWith("^") && uri.endsWith("$");

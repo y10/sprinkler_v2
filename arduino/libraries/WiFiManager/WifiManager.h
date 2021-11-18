@@ -13,7 +13,7 @@
 #define SPRINKLER_WIFI_MNG_H
 
 #include <ESP8266WiFi.h>
-#include <ESPAsyncWebServer.h>
+#include <ESP8266WebServer.h>
 #include <DNSServer.h>
 #include <memory>
 
@@ -57,7 +57,7 @@ public:
  
 private:
     std::unique_ptr<DNSServer> dnsServer;
-    std::unique_ptr<AsyncWebServer> server;
+    std::unique_ptr<ESP8266WebServer> server;
 
     const int WM_DONE = 0;
     const int WM_WAIT = 10;
@@ -67,8 +67,7 @@ private:
     void    begin(char const *apName, char const *apPasswd);
     
     int         _eepromStart;
-    String      _chip = "no-net";
-    String      _name = "";
+    String      _apName = "no-net";
     const char* _apPasswd = NULL;
     String      _ssid = "";
     String      _pass = "";
@@ -85,13 +84,13 @@ private:
     int status = WL_IDLE_STATUS;
     void connectWifi(String ssid, String pass);
 
-    void handleRoot(AsyncWebServerRequest *request);
-    void handleHostInfo(AsyncWebServerRequest *request);
-    void handleWifiScan(AsyncWebServerRequest *request);
-    void handleRootPost(AsyncWebServerRequest *request);
-    void handleNotFound(AsyncWebServerRequest *request);
-    void handle204(AsyncWebServerRequest *request);
-    boolean captivePortal(AsyncWebServerRequest *request);
+    void handleRoot();
+    void handleHostInfo();
+    void handleWifiScan();
+    void handleRootPost();
+    void handleNotFound();
+    void handle204();
+    boolean captivePortal();
     
     // DNS server
     const byte DNS_PORT = 53;

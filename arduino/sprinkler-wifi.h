@@ -10,34 +10,30 @@
 
 static WsConsole wifi_console("wifi");
 
-WiFiManager wifiManager;
+WiFiManager wifi_manager;
 
 void setupWifi()
 {
-    wifiManager.setFriendlyName(Sprinkler.dispname().c_str());
-
     WiFi.setSleepMode(WIFI_NONE_SLEEP);  
     WiFi.hostname(Sprinkler.hostname().c_str());
-    
-    wm_status_t status = wifiManager.autoConnect(Sprinkler.hostname().c_str());
+    wifi_manager.setTimeout(120);
+
+    wm_status_t status = wifi_manager.autoConnect(Sprinkler.hostname().c_str());
     switch (status)
     {
     case WM_FIRST_TIME_CONNECTED:
-        Sprinkler.hostname(wifiManager.getDeviceName().c_str());
-        Sprinkler.dispname(wifiManager.getFriendlyName().c_str());
+        wifi_console.println("connected.");
+        Sprinkler.hostname(WiFi.hostname().c_str());
         Sprinkler.save();
-        wifi_console.println("connected to Wifi.");
-        wifi_console.println("resetting.");
+        wifi_console.println("rebooting.");
         ESP.reset();
         break;
     case WM_CONNECT_FAILED:
-        wifi_console.println("failed to connect and hit timeout.");
+        wifi_console.println("failed.");
+        wifi_console.println("rebooting.");
         ESP.reset();
         return;
     }
-
-    //if you get here you have connected to the WiFi
-    
 }
 
 #endif

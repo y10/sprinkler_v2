@@ -11,7 +11,7 @@ class AsyncHTTPUpdateHandler : public AsyncWebHandler
 {
 public:
   AsyncHTTPUpdateHandler(const String &uri)
-    : AsyncHTTPUpdateHandler(uri, HTTP_POST)
+    : AsyncHTTPUpdateHandler(uri, ASYNC_HTTP_POST)
   { }
 
   AsyncHTTPUpdateHandler(const String &uri, WebRequestMethodComposite method)
