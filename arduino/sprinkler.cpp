@@ -84,14 +84,12 @@ void SprinklerControl::load() {
   SprinklerConfig cfg = Device.load();
   Console.logLevel((logLevel_t)cfg.loglevel);
   Settings.fromConfig(cfg);
-  console.println("JSON: ");
-  console.println(toJSON());
+  console.println("[Settings](api/settings)");
 }
 
 void SprinklerControl::save() {
   SprinklerConfig tmp = Settings.toConfig();
   Device.save(tmp);
-  console.println("JSON: ");
   console.println(toJSON());
 }
 
