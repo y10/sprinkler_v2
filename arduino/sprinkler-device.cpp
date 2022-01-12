@@ -92,6 +92,8 @@ SprinklerConfig SprinklerDevice::load() {
     console.println("not found.");
   }
 
+  EEPROM.end();
+
   return cfg;
 }
 
@@ -102,8 +104,9 @@ void SprinklerDevice::save(SprinklerConfig cfg) {
   cfg.loglevel = loglevel;
   cfg.version = version + 1;
   console.println("save");
+  EEPROM.begin(EEPROM_SIZE);
   EEPROM.put(0, cfg);
-  EEPROM.commit();
+  EEPROM.end()
 }
 
 void SprinklerDevice::clear() {
