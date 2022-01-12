@@ -106,7 +106,7 @@ void SprinklerDevice::save(SprinklerConfig cfg) {
   console.println("save");
   EEPROM.begin(EEPROM_SIZE);
   EEPROM.put(0, cfg);
-  EEPROM.end()
+  EEPROM.end();
 }
 
 void SprinklerDevice::clear() {
