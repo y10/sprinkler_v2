@@ -31,10 +31,14 @@ h1 {
 
 </style>
 <div class="container">
-    ${String.join([...Array(MAX_ZONES).keys()].map((o, i) => App.zones(i + 1)), x =>
-  `<sketch-checkbox zone-id="${x.id}" placeholder="Zone ${x.id}" text="${x.name}" ${x.defined() ? '' : 'disabled'} readonly>
-    ${Icons.sprinkler}
-  </sketch-checkbox>`)}
+    ${String.join([...Array(MAX_ZONES).keys()].map((o, i) => App.zones(i + 1)), x => 
+      x.defined() 
+      ?
+        `<sketch-checkbox zone-id="${x.id}" placeholder="Zone ${x.id}" text="${x.name}" readonly>
+          ${Icons.sprinkler}
+        </sketch-checkbox>` 
+      : ''
+    )}
 </div>`;
 export class ZoneList extends HTMLElement {
 
