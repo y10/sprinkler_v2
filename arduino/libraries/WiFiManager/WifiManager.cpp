@@ -11,7 +11,7 @@
  * Licensed under MIT license
  **************************************************************/
 
-#include "WifiManager.h"
+#include "WiFiManager.h"
 
 WiFiManager::WiFiManager()
 {
@@ -83,18 +83,28 @@ void WiFiManager::begin(char const *apName, char const *apPasswd)
   DEBUG_PRINT(F("HTTP server started"));
 }
 
-wm_status_t WiFiManager::autoConnect()
+bool WiFiManager::autoConnect()
 {
   String ssid = "ESP" + String(ESP.getChipId());
-  return autoConnect(ssid.c_str(), NULL);
+  return autoConnect(ssid.c_str(), NULL, NULL);
 }
 
-wm_status_t WiFiManager::autoConnect(char const *apName)
+bool WiFiManager::autoConnect(char const *apName)
 {
-  return autoConnect(apName, NULL);
+  return autoConnect(apName, NULL, NULL);
 }
 
-wm_status_t WiFiManager::autoConnect(char const *apName, char const *apPasswd)
+bool WiFiManager::autoConnect(char const *apName, char const *apPasswd)
+{
+  return autoConnect(apName, NULL, NULL);
+}
+
+bool WiFiManager::autoConnect(char const *apName, std::function<void()> onConnected)
+{
+  return autoConnect(apName, NULL, onConnected);
+}
+
+bool WiFiManager::autoConnect(char const *apName, char const *apPasswd, std::function<void()> onConnected)
 {
   DEBUG_PRINT(F(""));
   DEBUG_PRINT(F("AutoConnect"));
@@ -102,8 +112,7 @@ wm_status_t WiFiManager::autoConnect(char const *apName, char const *apPasswd)
   String pass = getPassword();
   WiFi.mode(WIFI_STA);
   connectWifi(ssid, pass);
-  int s = WiFi.status();
-  if (s == WL_CONNECTED)
+  if (WiFi.status() == WL_CONNECTED)
   {
     DEBUG_PRINT(F("IP Address:"));
     DEBUG_PRINT(WiFi.localIP());
@@ -112,10 +121,6 @@ wm_status_t WiFiManager::autoConnect(char const *apName, char const *apPasswd)
   }
 
   WiFi.mode(WIFI_AP);
-  if (_apcallback != NULL)
-  {
-    _apcallback();
-  }
   connect = false;
   begin(apName, apPasswd);
 
@@ -140,7 +145,8 @@ wm_status_t WiFiManager::autoConnect(char const *apName, char const *apPasswd)
         WiFi.mode(WIFI_STA);
         server.reset();
         dnsServer.reset();
-        return WM_FIRST_TIME_CONNECTED;
+        if (onConnected)
+          onConnected();
       }
       else
       {
@@ -383,12 +389,6 @@ boolean WiFiManager::captivePortal()
     return true;
   }
   return false;
-}
-
-//start up config portal callback
-void WiFiManager::setAPCallback(void (*func)(void))
-{
-  _apcallback = func;
 }
 
 template <typename Generic>

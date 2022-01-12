@@ -30,9 +30,11 @@ class WiFiManager
 public:
     WiFiManager();
         
-    wm_status_t autoConnect();
-    wm_status_t autoConnect(char const *apName);
-    wm_status_t autoConnect(char const *apName, char const *apPasswd);
+    bool autoConnect();
+    bool autoConnect(char const *apName);
+    bool autoConnect(char const *apName, char const *apPasswd);
+    bool autoConnect(char const *apName, std::function<void()> onConnected);    
+    bool autoConnect(char const *apName, char const *apPasswd, std::function<void()> onConnected);
 
     String  getDeviceName();
     String  getFriendlyName();
@@ -53,7 +55,6 @@ public:
 
     //sets a custom ip /gateway /subnet configuration
     void    setAPConfig(IPAddress ip, IPAddress gw, IPAddress sn);
-    void    setAPCallback( void (*func)(void) );    
  
 private:
     std::unique_ptr<DNSServer> dnsServer;
@@ -102,8 +103,6 @@ private:
 
     boolean connect;
     boolean _debug = false;
-
-    void (*_apcallback)(void) = NULL;
 
     template <typename Generic>
     void DEBUG_PRINT(Generic text);
